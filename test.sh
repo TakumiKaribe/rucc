@@ -1,3 +1,4 @@
+#!/bin/sh
 
 try() {
     expected="$1"

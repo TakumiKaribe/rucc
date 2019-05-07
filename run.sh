@@ -1,3 +1,5 @@
+#!/bin/sh
+
 if [ -z "$(docker image ls -q rucc)" ]; then
     docker build . -t rucc
 fi
