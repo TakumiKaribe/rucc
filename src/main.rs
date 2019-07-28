@@ -1,17 +1,13 @@
 fn main() {
-    let args: Vec<String> = std::env::args().collect();
+    let args = std::env::args().collect::<Vec<String>>();
     if args.len() != 2 {
         eprintln!("引数の個数が正しくありません");
         std::process::exit(1);
     }
 
-    let arg: i32 = match args[1].parse() {
-        Ok(value) => value,
-        Err(err) => {
-            eprintln!("引数が整数ではありません\n{}", err);
-            std::process::exit(1);
-        }
-    };
+    let arg = args[1]
+        .parse::<i32>()
+        .unwrap_or_else(|e| panic!("引数が整数ではありません{}", e));
 
     println!(".intel_syntax noprefix");
     println!(".global main");
