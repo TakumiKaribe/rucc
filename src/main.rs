@@ -10,7 +10,7 @@ fn main() {
         Err(err) => {
             eprintln!("引数が整数ではありません\n{}", err);
             std::process::exit(1);
-        },
+        }
     };
 
     println!(".intel_syntax noprefix");
