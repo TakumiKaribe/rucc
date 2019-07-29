@@ -1,8 +1,8 @@
-#[derive(Debug)]
-enum Operator {
-    Plus,
-    Minus,
-}
+mod token;
+mod token_kind;
+
+use token::Token;
+use token_kind::TokenKind;
 
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
@@ -11,54 +11,78 @@ fn main() {
         std::process::exit(1);
     }
 
+    let mut tokens: Vec<Token> = vec![];
+
     println!(".intel_syntax noprefix");
     println!(".global main");
     println!("main:");
 
     let mut arg = args.get(1).unwrap().chars().peekable();
     let mut num = 0;
-    let mut op: Option<Operator> = None;
+
     loop {
-        let peek = arg.peek();
-        if let Some(' ') = peek {
+        if let Some(' ') = arg.peek() {
             arg.next();
             continue;
         }
 
-        if peek.map_or(false, |v| v.is_digit(10)) {
-            num *= 10;
-            num += arg.next().unwrap().to_digit(10).unwrap();
-            continue;
-        }
-
-        match peek {
-            Some('+') | Some('-') => {
-                gen(&op, num);
-
-                num = 0;
-                op = arg.next().map(|c| {
-                    if c == '+' {
-                        Operator::Plus
-                    } else {
-                        Operator::Minus
-                    }
-                });
+        match arg.peek() {
+            Some('+') => {
+                let op = arg.next().unwrap();
+                tokens.push(Token::new(
+                    TokenKind::Reserved(op.to_string()),
+                    Some(op.to_string()),
+                ));
+                continue;
             }
+
+            Some('-') => {
+                let op = arg.next().unwrap();
+                tokens.push(Token::new(
+                    TokenKind::Reserved(op.to_string()),
+                    Some(op.to_string()),
+                ));
+                continue;
+            }
+
             None => {
-                gen(&op, num);
+                tokens.push(Token::new(TokenKind::EOF, None));
                 break;
             }
-            _ => panic!(""),
+
+            _ => {}
+        }
+
+        loop {
+            if arg.peek().map_or(false, |v| v.is_digit(10)) {
+                num *= 10;
+                num += arg.next().unwrap().to_digit(10).unwrap();
+            } else {
+                tokens.push(Token::new(TokenKind::Num(num), Some(num.to_string())));
+                num = 0;
+                break;
+            }
+        }
+    }
+
+    dbg!(&tokens);
+
+    let mut iter = tokens.iter().peekable();
+    println!("  mov rax, {}", iter.next().unwrap().expect_number());
+
+    while iter.peek().map_or(false, |t| !t.is_eof()) {
+        match iter.next().unwrap() {
+            token if token.consume(TokenKind::Reserved('+'.to_string())) => {
+                let token = iter.next().expect("invalid");
+                println!("  add rax, {}", token.expect_number());
+            }
+            token if token.consume(TokenKind::Reserved('-'.to_string())) => {
+                let token = iter.next().expect("invalid");
+                println!("  sub rax, {}", token.expect_number());
+            }
+            _ => panic!("iterate tokens failure"),
         }
     }
 
     println!("  ret");
-}
-
-fn gen(op: &Option<Operator>, num: u32) {
-    match op {
-        None => println!("  mov rax, {}", num),
-        Some(Operator::Plus) => println!("  add rax, {}", num),
-        Some(Operator::Minus) => println!("  sub rax, {}", num),
-    }
 }
