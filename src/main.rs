@@ -13,10 +13,6 @@ fn main() {
 
     let mut tokens: Vec<Token> = vec![];
 
-    println!(".intel_syntax noprefix");
-    println!(".global main");
-    println!("main:");
-
     let mut arg = args.get(1).unwrap().chars().peekable();
     let mut num = 0;
 
@@ -66,6 +62,10 @@ fn main() {
     }
 
     dbg!(&tokens);
+
+    println!(".intel_syntax noprefix");
+    println!(".global main");
+    println!("main:");
 
     let mut iter = tokens.iter().peekable();
     println!("  mov rax, {}", iter.next().unwrap().expect_number());
