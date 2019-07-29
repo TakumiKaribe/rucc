@@ -23,16 +23,7 @@ fn main() {
         }
 
         match arg.peek() {
-            Some('+') => {
-                let op = arg.next().unwrap();
-                tokens.push(Token::new(
-                    TokenKind::Reserved(op.to_string()),
-                    Some(op.to_string()),
-                ));
-                continue;
-            }
-
-            Some('-') => {
+            Some('+') | Some('-') => {
                 let op = arg.next().unwrap();
                 tokens.push(Token::new(
                     TokenKind::Reserved(op.to_string()),
