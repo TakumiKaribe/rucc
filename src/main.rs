@@ -31,7 +31,7 @@ fn main() {
             continue;
         }
 
-        match arg.peek() {
+        match peek {
             Some('+') | Some('-') => {
                 gen(&op, num);
 
