@@ -16,4 +16,4 @@ test:
 	make clean
 
 clean:
-	rm tmp*
+	rm -fv tmp*
