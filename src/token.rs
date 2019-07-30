@@ -19,16 +19,16 @@ impl Token {
             _ => false,
         }
     }
-
-    pub(crate) fn expect(&self, kind: TokenKind) {
-        use TokenKind::*;
-        match (&self.kind, &kind) {
-            (Num(_), Num(_)) | (EOF, EOF) => {}
-            (Reserved(ref lhs), Reserved(ref rhs)) if lhs == rhs => {}
-            _ => panic!("'{:?}'ではありません", kind),
-        };
-    }
-
+    /*
+        pub(crate) fn expect(&self, kind: TokenKind) {
+            use TokenKind::*;
+            match (&self.kind, &kind) {
+                (Num(_), Num(_)) | (EOF, EOF) => {}
+                (Reserved(ref lhs), Reserved(ref rhs)) if lhs == rhs => {}
+                _ => panic!("'{:?}'ではありません", kind),
+            };
+        }
+    */
     pub(crate) fn expect_number(&self) -> u32 {
         use TokenKind::*;
         match &self.kind {
