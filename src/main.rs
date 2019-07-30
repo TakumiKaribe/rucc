@@ -19,27 +19,32 @@ fn main() {
         match arg.peek() {
             Some(' ') => {
                 arg.next();
-                continue;
-            },
-            Some('+') | Some('-') => {
-                let op = arg.next().unwrap();
+            }
+            Some(op) if op == &'+' || op == &'-' => {
                 tokens.push(Token::new(
                     TokenKind::Reserved(op.to_string()),
                     Some(op.to_string()),
                 ));
-                continue;
-            },
+                arg.next();
+            }
+            Some(n) if n.is_digit(10) => {
+                let mut n = arg.next().unwrap();
+                loop {
+                    num *= 10;
+                    num += n.to_digit(10).unwrap();
+                    if arg.peek().map_or(false, |t| t.is_digit(10)) {
+                        n = arg.next().unwrap();
+                    } else {
+                        tokens.push(Token::new(TokenKind::Num(num), Some(num.to_string())));
+                        num = 0;
+                        break;
+                    }
+                }
+            }
+            Some(c) => panic!("invalid charactor {}", c),
             None => {
                 tokens.push(Token::new(TokenKind::EOF, None));
                 break;
-            },
-            n => {
-                while n.map_or(false, |n| n.is_digit(10)) {
-                    num *= 10;
-                    num += arg.next().unwrap().to_digit(10).unwrap();
-                }
-                tokens.push(Token::new(TokenKind::Num(num), Some(num.to_string())));
-                num = 0;
             }
         }
     }
