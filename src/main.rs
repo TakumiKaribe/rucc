@@ -15,12 +15,11 @@ fn main() {
     let mut arg = args.get(1).unwrap().chars().peekable();
 
     loop {
-        if let Some(' ') = arg.peek() {
-            arg.next();
-            continue;
-        }
-
         match arg.peek() {
+            Some(' ') => {
+                arg.next();
+                continue;
+            },
             Some('+') | Some('-') => {
                 let op = arg.next().unwrap();
                 tokens.push(Token::new(
