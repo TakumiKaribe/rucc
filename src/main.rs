@@ -14,6 +14,7 @@ fn main() {
     let mut tokens: Vec<Token> = vec![];
     let mut arg = args.get(1).unwrap().chars().peekable();
 
+    let mut num = 0;
     loop {
         match arg.peek() {
             Some(' ') => {
@@ -32,15 +33,15 @@ fn main() {
                 tokens.push(Token::new(TokenKind::EOF, None));
                 break;
             },
-            _ => {}
+            n => {
+                while n.map_or(false, |n| n.is_digit(10)) {
+                    num *= 10;
+                    num += arg.next().unwrap().to_digit(10).unwrap();
+                }
+                tokens.push(Token::new(TokenKind::Num(num), Some(num.to_string())));
+                num = 0;
+            }
         }
-
-        let mut num = 0;
-        while arg.peek().map_or(false, |v| v.is_digit(10)) {
-                num *= 10;
-                num += arg.next().unwrap().to_digit(10).unwrap();
-        }
-        tokens.push(Token::new(TokenKind::Num(num), Some(num.to_string())));
     }
 
     dbg!(&tokens);
