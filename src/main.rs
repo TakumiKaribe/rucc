@@ -42,7 +42,7 @@ fn main() {
                         n = arg.next().unwrap();
                     } else {
                         tokens.push(Token::new(TokenKind::Num(num, loc), Some(num.to_string())));
-                        let digit = ((num as f64).log10() as u32) + 1;
+                        let digit = f64::from(num).log10() as u32 + 1;
                         loc.succ(digit);
                         loc.len(digit);
                         num = 0;
@@ -50,7 +50,7 @@ fn main() {
                     }
                 }
             }
-            Some(c) => error_at(c, loc),
+            Some(c) => error_at(*c, loc),
             None => {
                 tokens.push(Token::new(TokenKind::EOF, None));
                 break;
@@ -94,7 +94,7 @@ fn main() {
     println!("  ret");
 }
 
-fn error_at(c: &char, loc: Location) {
+fn error_at(c: char, loc: Location) {
     (0..loc.at).for_each(|_| print!(" "));
     (0..loc.len).for_each(|_| print!("^"));
     println!(" invalid charactor is {}", c);
