@@ -14,8 +14,8 @@ impl Token {
     pub(crate) fn consume(&self, kind: TokenKind) -> bool {
         use TokenKind::*;
         match (&self.kind, kind) {
-            (Num(_), Num(_)) | (EOF, EOF) => true,
-            (Reserved(ref lhs), Reserved(ref rhs)) if lhs == rhs => true,
+            (Num(_, _), Num(_, _)) | (EOF, EOF) => true,
+            (Reserved(ref lhs, _), Reserved(ref rhs, _)) if lhs == rhs => true,
             _ => false,
         }
     }
@@ -32,7 +32,7 @@ impl Token {
     pub(crate) fn expect_number(&self) -> u32 {
         use TokenKind::*;
         match &self.kind {
-            Num(n) => *n,
+            Num(n, _) => *n,
             _ => panic!("数ではありません"),
         }
     }
