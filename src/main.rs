@@ -41,10 +41,10 @@ fn main() {
                     if arg.peek().map_or(false, |t| t.is_digit(10)) {
                         n = arg.next().unwrap();
                     } else {
-                        tokens.push(Token::new(TokenKind::Num(num, loc), Some(num.to_string())));
                         let digit = f64::from(num).log10() as u32 + 1;
-                        loc.succ(digit);
                         loc.len(digit);
+                        tokens.push(Token::new(TokenKind::Num(num, loc), Some(num.to_string())));
+                        loc.succ(digit);
                         num = 0;
                         break;
                     }
@@ -96,7 +96,7 @@ fn main() {
 
 fn error_at(c: char, loc: Location) {
     (0..loc.at).for_each(|_| print!(" "));
-    (0..loc.len).for_each(|_| print!("^"));
+    print!("^");
     println!(" invalid charactor is {}", c);
     panic!();
 }
