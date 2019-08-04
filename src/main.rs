@@ -1,3 +1,5 @@
+use std::io;
+
 mod token;
 mod token_kind;
 
@@ -6,22 +8,21 @@ use token_kind::Location;
 use token_kind::TokenKind;
 
 fn main() {
-    let args = std::env::args().collect::<Vec<String>>();
-    if args.len() != 2 {
-        eprintln!("invalid arguments");
-        std::process::exit(1);
-    }
+    let mut program = String::new();
+    io::stdin()
+        .read_line(&mut program)
+        .unwrap_or_else(|e| panic!("{}", e));
 
+    let mut program = program.chars().peekable();
     let mut tokens: Vec<Token> = vec![];
-    let mut arg = args.get(1).unwrap().chars().peekable();
 
     let mut num = 0;
     let mut loc = Location { at: 0, len: 0 };
 
     loop {
-        match arg.peek() {
+        match program.peek() {
             Some(' ') => {
-                arg.next();
+                program.next();
                 loc.succ(1);
             }
             Some(op) if op == &'+' || op == &'-' => {
@@ -30,16 +31,16 @@ fn main() {
                     TokenKind::Reserved(op.to_string(), loc),
                     Some(op.to_string()),
                 ));
-                arg.next();
+                program.next();
                 loc.succ(1);
             }
             Some(n) if n.is_digit(10) => {
-                let mut n = arg.next().unwrap();
+                let mut n = program.next().unwrap();
                 loop {
                     num *= 10;
                     num += n.to_digit(10).unwrap();
-                    if arg.peek().map_or(false, |t| t.is_digit(10)) {
-                        n = arg.next().unwrap();
+                    if program.peek().map_or(false, |t| t.is_digit(10)) {
+                        n = program.next().unwrap();
                     } else {
                         let digit = f64::from(num).log10() as u32 + 1;
                         loc.len(digit);
@@ -97,6 +98,6 @@ fn main() {
 fn error_at(c: char, loc: Location) {
     (0..loc.at).for_each(|_| print!(" "));
     print!("^");
-    println!(" invalid charactor is {}", c);
+    println!(" invalid charactor is '{}'", c);
     panic!();
 }
