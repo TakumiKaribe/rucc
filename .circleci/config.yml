@@ -1,4 +1,8 @@
 version: 2
+
+orbs:
+  codecov: codecov/codecov@1.0.5
+
 jobs:
   build:
     docker:
@@ -10,7 +14,10 @@ jobs:
           command: rustup --version
       - run:
           name: rustup component add
-          command: rustup component add clippy
+          command: rustup component add clippy rustfmt
+      - run:
+          name: fmt
+          command: cargo fmt -- --check
       - restore_cache:
           keys:
             - v1-cargo-lock-{{ checksum "Cargo.lock" }}
@@ -19,9 +26,33 @@ jobs:
           command: cargo build
       - run:
           name: lint
-          command: cargo clippy -- -D warnings
+          command: cargo clippy
       - save_cache:
           key: v1-cargo-lock-{{ checksum "Cargo.lock" }}
           paths:
             - "/usr/local/cargo/registry"
             - "target"
+      - run:
+          name: kcov
+          command: |
+              wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz
+              tar xzf master.tar.gz
+              cd kcov-master
+              mkdir build
+              cd build
+              cmake ..
+              make
+              make install DESTDIR=../../kcov-build
+              cd ../..
+              rm -rf kcov-master
+      - run:
+          name: test
+          command: cargo test
+      - run:
+          name: coverage
+          command: |
+            for file in target/debug/rucc-*[^\.d]; do 
+                mkdir -p "target/cov/$(basename $file)"; ./kcov-build/usr/local/bin/kcov --exclude-pattern=/.cargo,/usr/lib --verify "target/cov/$(basename $file)" "$file"; 
+            done
+            bash <(curl -s https://codecov.io/bash)
+            echo "Uploaded code coverage"
