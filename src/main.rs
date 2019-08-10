@@ -21,7 +21,7 @@ fn main() {
 
     loop {
         match program.peek() {
-            Some(' ') => {
+            Some(' ') | Some('\n') => {
                 program.next();
                 loc.succ(1);
             }
