@@ -35,11 +35,13 @@ impl Token {
         }
     }
 
-    pub(crate) fn is_eof(&self) -> bool {
-        use TokenKind::*;
-        match &self.kind {
-            EOF => true,
-            _ => false,
+    /*
+        pub(crate) fn is_eof(&self) -> bool {
+            use TokenKind::*;
+            match &self.kind {
+                EOF => true,
+                _ => false,
+            }
         }
-    }
+    */
 }
