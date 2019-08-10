@@ -73,21 +73,11 @@ fn main() {
 
     while iter.peek().map_or(false, |t| !t.is_eof()) {
         match iter.next().unwrap() {
-            token
-                if token.consume(TokenKind::Reserved(
-                    '+'.to_string(),
-                    Location { at: 0, len: 0 },
-                )) =>
-            {
+            token if token.consume("+") => {
                 let token = iter.next().expect("invalid");
                 println!("  add rax, {}", token.expect_number());
             }
-            token
-                if token.consume(TokenKind::Reserved(
-                    '-'.to_string(),
-                    Location { at: 0, len: 0 },
-                )) =>
-            {
+            token if token.consume("-") => {
                 let token = iter.next().expect("invalid");
                 println!("  sub rax, {}", token.expect_number());
             }
@@ -103,4 +93,102 @@ fn error_at(c: char, loc: Location) {
     print!("^");
     println!(" invalid charactor is '{}'", c);
     panic!();
+}
+
+fn expr(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<Node> {
+    let mut node = mul(tokens);
+
+    loop {
+        let token = tokens.peek().expect("token is none");
+
+        if token.consume("+") {
+            tokens.next();
+            node = Box::new(Node {
+                kind: NodeKind::Add,
+                lhs: Some(node),
+                rhs: Some(mul(tokens)),
+            });
+        } else if token.consume("-") {
+            tokens.next();
+            node = Box::new(Node {
+                kind: NodeKind::Sub,
+                lhs: Some(node),
+                rhs: Some(mul(tokens)),
+            });
+        } else {
+            break;
+        }
+    }
+
+    node
+}
+
+fn mul(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<Node> {
+    let mut node = term(tokens);
+
+    loop {
+        let token = tokens.peek().expect("token is none");
+
+        if token.consume("*") {
+            tokens.next();
+            node = Box::new(Node {
+                kind: NodeKind::Mul,
+                lhs: Some(node),
+                rhs: Some(term(tokens)),
+            });
+        } else if token.consume("/") {
+            tokens.next();
+            node = Box::new(Node {
+                kind: NodeKind::Div,
+                lhs: Some(node),
+                rhs: Some(term(tokens)),
+            });
+        } else {
+            break;
+        }
+    }
+
+    node
+}
+
+fn term(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<Node> {
+    let token = tokens.next().expect("token is none");
+
+    if token.consume("(") {
+        let node = expr(tokens);
+        tokens.next().expect("tokens is none").expect(")");
+        node
+    } else {
+        Box::new(Node {
+            kind: NodeKind::Num(token.expect_number()),
+            lhs: None,
+            rhs: None,
+        })
+    }
+}
+
+fn gen(node: Box<Node>) {
+    if let NodeKind::Num(val) = node.kind {
+        println!("  push {}", val);
+        return;
+    }
+
+    gen(node.lhs.expect("token is none"));
+    gen(node.rhs.expect("token is none"));
+
+    println!("  pop rdi");
+    println!("  pop rax");
+
+    match node.kind {
+        NodeKind::Add => println!("  add rax, rdi"),
+        NodeKind::Sub => println!("  sub rax, rdi"),
+        NodeKind::Mul => println!("  imul rax, rdi"),
+        NodeKind::Div => {
+            println!("  cqo");
+            println!("  idiv rdi");
+        }
+        _ => panic!("invalid kind"),
+    }
+
+    println!("  push rax");
 }

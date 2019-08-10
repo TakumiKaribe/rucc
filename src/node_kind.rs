@@ -4,5 +4,5 @@ pub(crate) enum NodeKind {
     Sub,
     Mul,
     Div,
-    Num(u64)
+    Num(u32),
 }

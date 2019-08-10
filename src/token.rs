@@ -11,24 +11,22 @@ impl Token {
         Token { kind, raw_string }
     }
 
-    pub(crate) fn consume(&self, kind: TokenKind) -> bool {
+    pub(crate) fn consume(&self, op: &str) -> bool {
         use TokenKind::*;
-        match (&self.kind, kind) {
-            (Num(_, _), Num(_, _)) | (EOF, EOF) => true,
-            (Reserved(ref lhs, _), Reserved(ref rhs, _)) if lhs == rhs => true,
+        match &self.kind {
+            Reserved(kind, _) if kind == op => true,
             _ => false,
         }
     }
-    /*
-        pub(crate) fn expect(&self, kind: TokenKind) {
-            use TokenKind::*;
-            match (&self.kind, &kind) {
-                (Num(_), Num(_)) | (EOF, EOF) => {}
-                (Reserved(ref lhs), Reserved(ref rhs)) if lhs == rhs => {}
-                _ => panic!("'{:?}'ではありません", kind),
-            };
+
+    pub(crate) fn expect(&self, op: &str) {
+        use TokenKind::*;
+        match &self.kind {
+            Reserved(kind, _) if kind == op => {}
+            _ => panic!("{}ではありません", op),
         }
-    */
+    }
+
     pub(crate) fn expect_number(&self) -> u32 {
         use TokenKind::*;
         match &self.kind {
