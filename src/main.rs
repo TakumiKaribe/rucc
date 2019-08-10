@@ -1,11 +1,14 @@
 use std::io;
 
+mod node;
+mod node_kind;
 mod token;
 mod token_kind;
 
+use node::Node;
+use node_kind::NodeKind;
 use token::Token;
-use token_kind::Location;
-use token_kind::TokenKind;
+use token_kind::*;
 
 fn main() {
     let mut program = String::new();
