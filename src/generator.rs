@@ -1,10 +1,39 @@
 use super::node::Node;
 use super::node_kind::NodeKind::*;
 
-pub(crate) fn gen(node: Box<Node>) {
-    if let Num(val) = node.kind {
-        println!("  push {}", val);
+fn gen_lval(node: &Node) {
+    if let LVar(offset) = node.kind {
+        println!("  mov rax, rbp");
+        println!("  sub rax, {}", offset);
+        println!("  push rax");
         return;
+    }
+    panic!("left value is not variable")
+}
+
+pub(crate) fn gen(node: Box<Node>) {
+    match node.kind {
+        Num(val) => {
+            println!("  push {}", val);
+            return;
+        }
+        LVar(_) => {
+            gen_lval(&node);
+            println!("  pop rax");
+            println!("  mov rax, [rax]");
+            println!("  push rax");
+            return;
+        }
+        Assign => {
+            gen_lval(&node);
+            gen(node.rhs.expect("[ASSIGN] right value is not found"));
+            println!("  pop rdi");
+            println!("  pop rax");
+            println!("  mov [rax], rdi");
+            println!("  push rdi");
+            return;
+        }
+        _ => {}
     }
 
     gen(node.lhs.expect("token is none"));

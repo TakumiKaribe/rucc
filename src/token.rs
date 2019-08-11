@@ -3,11 +3,11 @@ use super::token_kind::*;
 #[derive(Debug)]
 pub(crate) struct Token {
     kind: TokenKind,
-    raw_string: Option<String>,
+    pub(crate) raw_string: String,
 }
 
 impl Token {
-    pub(crate) fn new(kind: TokenKind, raw_string: Option<String>) -> Token {
+    pub(crate) fn new(kind: TokenKind, raw_string: String) -> Token {
         Token { kind, raw_string }
     }
 
@@ -15,6 +15,14 @@ impl Token {
         use TokenKind::*;
         match &self.kind {
             Reserved(kind, _) if kind == op => true,
+            _ => false,
+        }
+    }
+
+    pub(crate) fn consume_ident(&self) -> bool {
+        use TokenKind::*;
+        match &self.kind {
+            Ident(_, _) => true,
             _ => false,
         }
     }
@@ -35,13 +43,11 @@ impl Token {
         }
     }
 
-    /*
-        pub(crate) fn is_eof(&self) -> bool {
-            use TokenKind::*;
-            match &self.kind {
-                EOF => true,
-                _ => false,
-            }
+    pub(crate) fn is_eof(&self) -> bool {
+        use TokenKind::*;
+        match &self.kind {
+            EOF => true,
+            _ => false,
         }
-    */
+    }
 }

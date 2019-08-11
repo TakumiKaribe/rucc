@@ -2,6 +2,7 @@
 pub(crate) enum TokenKind {
     Reserved(String, Location),
     Num(u32, Location),
+    Ident(String, Location),
     EOF,
 }
 

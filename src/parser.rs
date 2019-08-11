@@ -2,8 +2,44 @@ use super::node::Node;
 use super::node_kind::NodeKind;
 use super::token::Token;
 
-pub(crate) fn expr(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<Node> {
-    equality(tokens)
+pub(crate) fn program(
+    tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>,
+) -> Vec<Box<Node>> {
+    let mut program: Vec<Box<Node>> = Vec::new();
+    loop {
+        if tokens.peek().map_or(false, |t| t.is_eof()) {
+            break;
+        } else {
+            program.push(stmt(tokens));
+        }
+    }
+    program
+}
+
+fn stmt(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<Node> {
+    let node = expr(tokens);
+    tokens
+        .next()
+        .unwrap_or_else(|| panic!("expected ';'"))
+        .expect(";");
+    node
+}
+
+fn expr(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<Node> {
+    assign(tokens)
+}
+
+fn assign(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<Node> {
+    let mut node = equality(tokens);
+    if tokens.peek().map_or(false, |t| t.consume("=")) {
+        tokens.next();
+        node = Box::new(Node {
+            kind: NodeKind::Assign,
+            lhs: Some(node),
+            rhs: Some(assign(tokens)),
+        });
+    }
+    node
 }
 
 fn equality(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<Node> {
@@ -161,6 +197,14 @@ fn term(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<N
         let node = expr(tokens);
         tokens.next().expect("tokens is none").expect(")");
         node
+    } else if token.consume_ident() {
+        Box::new(Node {
+            kind: NodeKind::LVar(
+                (u32::from(token.raw_string.chars().nth(0).unwrap()) - u32::from('a')) * 8,
+            ),
+            lhs: None,
+            rhs: None,
+        })
     } else {
         Box::new(Node {
             kind: NodeKind::Num(token.expect_number()),

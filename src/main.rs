@@ -18,16 +18,21 @@ fn main() {
 
     dbg!(&tokens);
 
-    let node = parser::expr(&mut tokens.iter().peekable());
+    let program = parser::program(&mut tokens.iter().peekable());
 
-    dbg!(&node);
+    dbg!(&program);
 
     println!(".intel_syntax noprefix");
     println!(".global main");
     println!("main:");
 
-    generator::gen(node);
+    println!("  push rbp");
+    println!("  mov rbp, rsp");
+    println!("  sub rsp, 208");
 
+    program.into_iter().for_each(|ast| generator::gen(ast));
+
+    println!("  mov rsp, rbp");
     println!("  pop rax");
     println!("  ret");
 }
