@@ -20,6 +20,7 @@ pub(crate) fn tokenize(program: &mut std::iter::Peekable<std::str::Chars<'_>>) -
                 program.next();
                 loc.succ(1);
             }
+
             Some(op)
                 if op == &'+'
                     || op == &'-'
@@ -37,6 +38,7 @@ pub(crate) fn tokenize(program: &mut std::iter::Peekable<std::str::Chars<'_>>) -
                 program.next();
                 loc.succ(1);
             }
+
             Some(op) if op == &'=' || op == &'<' || op == &'>' => {
                 let mut op = program.next().unwrap().to_string();
                 loc.len(1);
@@ -51,6 +53,7 @@ pub(crate) fn tokenize(program: &mut std::iter::Peekable<std::str::Chars<'_>>) -
                     loc.succ(1);
                 }
             }
+
             Some(op) if op == &'!' => {
                 if let Some(&'=') = program.peek() {
                     loc.len(2);
@@ -65,6 +68,7 @@ pub(crate) fn tokenize(program: &mut std::iter::Peekable<std::str::Chars<'_>>) -
                     error_at(*program.peek().unwrap(), loc);
                 }
             }
+
             Some(var) if ('a'..='z').contains(var) => {
                 let mut var = program.next().unwrap().to_string();
                 let mut len = 1;
@@ -77,6 +81,7 @@ pub(crate) fn tokenize(program: &mut std::iter::Peekable<std::str::Chars<'_>>) -
                 loc.succ(len);
                 program.next();
             }
+
             Some(n) if n.is_digit(10) => {
                 let mut n = program.next().unwrap();
                 loop {
@@ -94,7 +99,9 @@ pub(crate) fn tokenize(program: &mut std::iter::Peekable<std::str::Chars<'_>>) -
                     }
                 }
             }
+
             Some(c) => error_at(*c, loc),
+
             None => {
                 tokens.push(Token::new(TokenKind::EOF, "".to_string()));
                 break;

@@ -9,12 +9,8 @@ pub(crate) fn program(
 ) -> Vec<Box<Node>> {
     let mut program: Vec<Box<Node>> = Vec::new();
     let mut locals = LVar::new();
-    loop {
-        if tokens.peek().map_or(false, |t| t.is_eof()) {
-            break;
-        } else {
-            program.push(stmt(tokens, &mut locals));
-        }
+    while tokens.peek().map_or(false, |t| t.is_eof()) {
+        program.push(stmt(tokens, &mut locals));
     }
     program
 }
