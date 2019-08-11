@@ -31,9 +31,12 @@ fn main() {
     println!("  mov rbp, rsp");
     println!("  sub rsp, 208");
 
-    program.into_iter().for_each(generator::gen);
+    program.into_iter().for_each(|ast| {
+        generator::gen(ast);
+        println!("  pop rax");
+    });
 
     println!("  mov rsp, rbp");
-    println!("  pop rax");
+    println!("  pop rbp");
     println!("  ret");
 }
