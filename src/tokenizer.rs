@@ -20,7 +20,14 @@ pub(crate) fn tokenize(program: &mut std::iter::Peekable<std::str::Chars<'_>>) -
                 program.next();
                 loc.succ(1);
             }
-            Some(op) if op == &'+' || op == &'-' || op == &'*' || op == &'/' => {
+            Some(op)
+                if op == &'+'
+                    || op == &'-'
+                    || op == &'*'
+                    || op == &'/'
+                    || op == &'('
+                    || op == &')' =>
+            {
                 loc.len(1);
                 tokens.push(Token::new(
                     TokenKind::Reserved(op.to_string(), loc),
@@ -28,6 +35,34 @@ pub(crate) fn tokenize(program: &mut std::iter::Peekable<std::str::Chars<'_>>) -
                 ));
                 program.next();
                 loc.succ(1);
+            }
+            Some(op) if op == &'=' || op == &'<' || op == &'>' => {
+                let mut op = program.next().unwrap().to_string();
+                loc.len(1);
+                if let Some(&'=') = program.peek() {
+                    op.push(program.next().unwrap());
+                    loc.len(2);
+                }
+                tokens.push(Token::new(TokenKind::Reserved(op.clone(), loc), Some(op)));
+                if loc.len == 2 {
+                    loc.succ(2);
+                } else {
+                    loc.succ(1);
+                }
+            }
+            Some(op) if op == &'!' => {
+                if let Some(&'=') = program.peek() {
+                    loc.len(2);
+                    tokens.push(Token::new(
+                        TokenKind::Reserved("!=".to_string(), loc),
+                        Some("!=".to_string()),
+                    ));
+                    loc.succ(2);
+                    program.next();
+                    program.next();
+                } else {
+                    error_at(*program.peek().unwrap(), loc);
+                }
             }
             Some(n) if n.is_digit(10) => {
                 let mut n = program.next().unwrap();
