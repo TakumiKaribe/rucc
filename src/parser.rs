@@ -41,14 +41,14 @@ fn mul(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<No
             node = Box::new(Node {
                 kind: NodeKind::Mul,
                 lhs: Some(node),
-                rhs: Some(term(tokens)),
+                rhs: Some(unary(tokens)),
             });
         } else if token.consume("/") {
             tokens.next();
             node = Box::new(Node {
                 kind: NodeKind::Div,
                 lhs: Some(node),
-                rhs: Some(term(tokens)),
+                rhs: Some(unary(tokens)),
             });
         } else {
             break;
@@ -71,5 +71,25 @@ fn term(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<N
             lhs: None,
             rhs: None,
         })
+    }
+}
+
+fn unary(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<Node> {
+    let token = tokens.peek().expect("token is none");
+
+    if token.consume("+") {
+        term(tokens)
+    } else if token.consume("-") {
+        Box::new(Node {
+            kind: NodeKind::Sub,
+            lhs: Some(Box::new(Node {
+                kind: NodeKind::Num(0),
+                lhs: None,
+                rhs: None,
+            })),
+            rhs: Some(term(tokens)),
+        })
+    } else {
+        term(tokens)
     }
 }
