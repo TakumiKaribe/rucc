@@ -1,23 +1,29 @@
 use super::node::Node;
 use super::node_kind::NodeKind;
 use super::token::Token;
+use super::token_kind::TokenKind;
+use super::variable::*;
 
 pub(crate) fn program(
     tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>,
 ) -> Vec<Box<Node>> {
     let mut program: Vec<Box<Node>> = Vec::new();
+    let mut locals = LVar::new();
     loop {
         if tokens.peek().map_or(false, |t| t.is_eof()) {
             break;
         } else {
-            program.push(stmt(tokens));
+            program.push(stmt(tokens, &mut locals));
         }
     }
     program
 }
 
-fn stmt(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<Node> {
-    let node = expr(tokens);
+fn stmt(
+    tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>,
+    locals: &mut LVar,
+) -> Box<Node> {
+    let node = expr(tokens, locals);
     tokens
         .next()
         .unwrap_or_else(|| panic!("expected ';'"))
@@ -25,25 +31,34 @@ fn stmt(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<N
     node
 }
 
-fn expr(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<Node> {
-    assign(tokens)
+fn expr(
+    tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>,
+    locals: &mut LVar,
+) -> Box<Node> {
+    assign(tokens, locals)
 }
 
-fn assign(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<Node> {
-    let mut node = equality(tokens);
+fn assign(
+    tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>,
+    locals: &mut LVar,
+) -> Box<Node> {
+    let mut node = equality(tokens, locals);
     if tokens.peek().map_or(false, |t| t.consume("=")) {
         tokens.next();
         node = Box::new(Node {
             kind: NodeKind::Assign,
             lhs: Some(node),
-            rhs: Some(assign(tokens)),
+            rhs: Some(assign(tokens, locals)),
         });
     }
     node
 }
 
-fn equality(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<Node> {
-    let mut node = relational(tokens);
+fn equality(
+    tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>,
+    locals: &mut LVar,
+) -> Box<Node> {
+    let mut node = relational(tokens, locals);
 
     loop {
         let token = tokens.peek().expect("token is none");
@@ -53,14 +68,14 @@ fn equality(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> B
             node = Box::new(Node {
                 kind: NodeKind::Equal,
                 lhs: Some(node),
-                rhs: Some(relational(tokens)),
+                rhs: Some(relational(tokens, locals)),
             });
         } else if token.consume("!=") {
             tokens.next();
             node = Box::new(Node {
                 kind: NodeKind::NotEqual,
                 lhs: Some(node),
-                rhs: Some(relational(tokens)),
+                rhs: Some(relational(tokens, locals)),
             });
         } else {
             break;
@@ -70,8 +85,11 @@ fn equality(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> B
     node
 }
 
-fn relational(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<Node> {
-    let mut node = add(tokens);
+fn relational(
+    tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>,
+    locals: &mut LVar,
+) -> Box<Node> {
+    let mut node = add(tokens, locals);
 
     loop {
         let token = tokens.peek().expect("token is none");
@@ -81,28 +99,28 @@ fn relational(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) ->
             node = Box::new(Node {
                 kind: NodeKind::LT,
                 lhs: Some(node),
-                rhs: Some(add(tokens)),
+                rhs: Some(add(tokens, locals)),
             });
         } else if token.consume("<=") {
             tokens.next();
             node = Box::new(Node {
                 kind: NodeKind::LTEqual,
                 lhs: Some(node),
-                rhs: Some(add(tokens)),
+                rhs: Some(add(tokens, locals)),
             });
         } else if token.consume(">") {
             tokens.next();
             node = Box::new(Node {
                 kind: NodeKind::GT,
                 lhs: Some(node),
-                rhs: Some(add(tokens)),
+                rhs: Some(add(tokens, locals)),
             });
         } else if token.consume(">=") {
             tokens.next();
             node = Box::new(Node {
                 kind: NodeKind::GTEqual,
                 lhs: Some(node),
-                rhs: Some(add(tokens)),
+                rhs: Some(add(tokens, locals)),
             });
         } else {
             break;
@@ -112,8 +130,11 @@ fn relational(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) ->
     node
 }
 
-fn add(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<Node> {
-    let mut node = mul(tokens);
+fn add(
+    tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>,
+    locals: &mut LVar,
+) -> Box<Node> {
+    let mut node = mul(tokens, locals);
 
     loop {
         let token = tokens.peek().expect("token is none");
@@ -123,14 +144,14 @@ fn add(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<No
             node = Box::new(Node {
                 kind: NodeKind::Add,
                 lhs: Some(node),
-                rhs: Some(mul(tokens)),
+                rhs: Some(mul(tokens, locals)),
             });
         } else if token.consume("-") {
             tokens.next();
             node = Box::new(Node {
                 kind: NodeKind::Sub,
                 lhs: Some(node),
-                rhs: Some(mul(tokens)),
+                rhs: Some(mul(tokens, locals)),
             });
         } else {
             break;
@@ -140,8 +161,11 @@ fn add(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<No
     node
 }
 
-fn mul(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<Node> {
-    let mut node = unary(tokens);
+fn mul(
+    tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>,
+    locals: &mut LVar,
+) -> Box<Node> {
+    let mut node = unary(tokens, locals);
 
     loop {
         let token = tokens.peek().expect("token is none");
@@ -151,14 +175,14 @@ fn mul(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<No
             node = Box::new(Node {
                 kind: NodeKind::Mul,
                 lhs: Some(node),
-                rhs: Some(unary(tokens)),
+                rhs: Some(unary(tokens, locals)),
             });
         } else if token.consume("/") {
             tokens.next();
             node = Box::new(Node {
                 kind: NodeKind::Div,
                 lhs: Some(node),
-                rhs: Some(unary(tokens)),
+                rhs: Some(unary(tokens, locals)),
             });
         } else {
             break;
@@ -168,12 +192,15 @@ fn mul(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<No
     node
 }
 
-fn unary(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<Node> {
+fn unary(
+    tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>,
+    locals: &mut LVar,
+) -> Box<Node> {
     let token = tokens.peek().expect("token is none");
 
     if token.consume("+") {
         tokens.next();
-        term(tokens)
+        term(tokens, locals)
     } else if token.consume("-") {
         tokens.next();
         Box::new(Node {
@@ -183,28 +210,45 @@ fn unary(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<
                 lhs: None,
                 rhs: None,
             })),
-            rhs: Some(term(tokens)),
+            rhs: Some(term(tokens, locals)),
         })
     } else {
-        term(tokens)
+        term(tokens, locals)
     }
 }
 
-fn term(tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>) -> Box<Node> {
+fn term(
+    tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>,
+    locals: &mut LVar,
+) -> Box<Node> {
     let token = tokens.next().expect("token is none");
 
     if token.consume("(") {
-        let node = expr(tokens);
+        let node = expr(tokens, locals);
         tokens.next().expect("tokens is none").expect(")");
         node
     } else if token.consume_ident() {
-        Box::new(Node {
+        let mut node = Node {
             kind: NodeKind::LVar(
                 (u32::from(token.raw_string.chars().nth(0).unwrap()) - u32::from('a')) * 8,
             ),
             lhs: None,
             rhs: None,
-        })
+        };
+        if let Some(var) = locals.find_lvar(token) {
+            node.kind = NodeKind::LVar(var.offset);
+        } else if let TokenKind::Ident(ref ident_name, _) = token.kind {
+            let lvar = Var {
+                name: ident_name.clone(),
+                len: ident_name.len() as u32,
+                offset: locals.offset() + 8,
+            };
+            node.kind = NodeKind::LVar(lvar.offset);
+            locals.push(lvar);
+        } else {
+            panic!("expect ident");
+        };
+        Box::new(node)
     } else {
         Box::new(Node {
             kind: NodeKind::Num(token.expect_number()),

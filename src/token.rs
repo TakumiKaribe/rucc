@@ -2,7 +2,7 @@ use super::token_kind::*;
 
 #[derive(Debug)]
 pub(crate) struct Token {
-    kind: TokenKind,
+    pub(crate) kind: TokenKind,
     pub(crate) raw_string: String,
 }
 

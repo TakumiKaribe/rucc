@@ -25,7 +25,7 @@ pub(crate) fn gen(node: Box<Node>) {
             return;
         }
         Assign => {
-            gen_lval(&node);
+            gen_lval(&node.lhs.unwrap());
             gen(node.rhs.expect("[ASSIGN] right value is not found"));
             println!("  pop rdi");
             println!("  pop rax");

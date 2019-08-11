@@ -66,12 +66,15 @@ pub(crate) fn tokenize(program: &mut std::iter::Peekable<std::str::Chars<'_>>) -
                 }
             }
             Some(var) if ('a'..='z').contains(var) => {
-                loc.len(1);
-                tokens.push(Token::new(
-                    TokenKind::Ident(var.to_string(), loc),
-                    var.to_string(),
-                ));
-                loc.succ(1);
+                let mut var = program.next().unwrap().to_string();
+                let mut len = 1;
+                while program.peek().map_or(false, |c| ('a'..='z').contains(c)) {
+                    var.push(program.next().unwrap());
+                    len += 1;
+                }
+                loc.len(len);
+                tokens.push(Token::new(TokenKind::Ident(var.clone(), loc), var));
+                loc.succ(len);
                 program.next();
             }
             Some(n) if n.is_digit(10) => {

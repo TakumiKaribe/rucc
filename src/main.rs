@@ -7,6 +7,7 @@ mod parser;
 mod token;
 mod token_kind;
 mod tokenizer;
+mod variable;
 
 fn main() {
     let mut program = String::new();
@@ -30,7 +31,7 @@ fn main() {
     println!("  mov rbp, rsp");
     println!("  sub rsp, 208");
 
-    program.into_iter().for_each(|ast| generator::gen(ast));
+    program.into_iter().for_each(generator::gen);
 
     println!("  mov rsp, rbp");
     println!("  pop rax");
