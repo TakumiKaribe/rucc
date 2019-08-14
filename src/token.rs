@@ -1,20 +1,22 @@
 use super::token_kind::*;
+use super::location::Location;
 
 #[derive(Debug)]
 pub(crate) struct Token {
     pub(crate) kind: TokenKind,
     pub(crate) raw_string: String,
+    pub(crate) location: Location,
 }
 
 impl Token {
-    pub(crate) fn new(kind: TokenKind, raw_string: String) -> Token {
-        Token { kind, raw_string }
+    pub(crate) fn new(kind: TokenKind, raw_string: String, location: Location) -> Token {
+        Token { kind, raw_string, location }
     }
 
     pub(crate) fn consume(&self, op: &str) -> bool {
         use TokenKind::*;
         match &self.kind {
-            Reserved(kind, _) if kind == op => true,
+            Reserved(kind) if kind == op => true,
             _ => false,
         }
     }
@@ -22,7 +24,7 @@ impl Token {
     pub(crate) fn consume_ident(&self) -> bool {
         use TokenKind::*;
         match &self.kind {
-            Ident(_, _) => true,
+            Ident(_) => true,
             _ => false,
         }
     }
@@ -30,7 +32,7 @@ impl Token {
     pub(crate) fn expect(&self, op: &str) {
         use TokenKind::*;
         match &self.kind {
-            Reserved(kind, _) if kind == op => {}
+            Reserved(kind) if kind == op => {}
             _ => panic!("{}ではありません", op),
         }
     }
@@ -38,7 +40,7 @@ impl Token {
     pub(crate) fn expect_number(&self) -> u32 {
         use TokenKind::*;
         match &self.kind {
-            Num(n, _) => *n,
+            Num(n) => *n,
             _ => panic!("数ではありません"),
         }
     }

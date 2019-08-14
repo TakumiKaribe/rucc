@@ -8,6 +8,7 @@ mod token;
 mod token_kind;
 mod tokenizer;
 mod variable;
+mod location;
 
 fn main() {
     let mut program = String::new();

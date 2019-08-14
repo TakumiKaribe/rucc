@@ -233,7 +233,7 @@ fn term(
         };
         if let Some(var) = locals.find_lvar(token) {
             node.kind = NodeKind::LVar(var.offset);
-        } else if let TokenKind::Ident(ref ident_name, _) = token.kind {
+        } else if let TokenKind::Ident(ref ident_name) = token.kind {
             let lvar = Var {
                 name: ident_name.clone(),
                 len: ident_name.len() as u32,

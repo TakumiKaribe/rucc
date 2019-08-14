@@ -1,5 +1,6 @@
 use super::token::Token;
 use super::token_kind::*;
+use super::location::Location;
 
 fn error_at(c: char, loc: Location) {
     (0..loc.at).for_each(|_| print!(" "));
@@ -32,8 +33,9 @@ pub(crate) fn tokenize(program: &mut std::iter::Peekable<std::str::Chars<'_>>) -
             {
                 loc.len(1);
                 tokens.push(Token::new(
-                    TokenKind::Reserved(op.to_string(), loc),
+                    TokenKind::Reserved(op.to_string()),
                     op.to_string(),
+                    loc,
                 ));
                 program.next();
                 loc.succ(1);
@@ -46,7 +48,7 @@ pub(crate) fn tokenize(program: &mut std::iter::Peekable<std::str::Chars<'_>>) -
                     op.push(program.next().unwrap());
                     loc.len(2);
                 }
-                tokens.push(Token::new(TokenKind::Reserved(op.clone(), loc), op));
+                tokens.push(Token::new(TokenKind::Reserved(op.clone()), op, loc));
                 if loc.len == 2 {
                     loc.succ(2);
                 } else {
@@ -58,8 +60,9 @@ pub(crate) fn tokenize(program: &mut std::iter::Peekable<std::str::Chars<'_>>) -
                 if let Some(&'=') = program.peek() {
                     loc.len(2);
                     tokens.push(Token::new(
-                        TokenKind::Reserved("!=".to_string(), loc),
+                        TokenKind::Reserved("!=".to_string()),
                         "!=".to_string(),
+                        loc,
                     ));
                     loc.succ(2);
                     program.next();
@@ -77,9 +80,9 @@ pub(crate) fn tokenize(program: &mut std::iter::Peekable<std::str::Chars<'_>>) -
                     len += 1;
                 }
                 loc.len(len);
-                match TokenKind::keywords(&var, &loc) {
-                    Some(kind) => tokens.push(Token::new(kind, var)),
-                    None => tokens.push(Token::new(TokenKind::Ident(var.clone(), loc), var)),
+                match TokenKind::keywords(&var) {
+                    Some(kind) => tokens.push(Token::new(kind, var, loc)),
+                    None => tokens.push(Token::new(TokenKind::Ident(var.clone()), var, loc)),
                 }
                 loc.succ(len);
                 program.next();
@@ -95,7 +98,7 @@ pub(crate) fn tokenize(program: &mut std::iter::Peekable<std::str::Chars<'_>>) -
                     } else {
                         let digit = f64::from(num).log10() as u32 + 1;
                         loc.len(digit);
-                        tokens.push(Token::new(TokenKind::Num(num, loc), num.to_string()));
+                        tokens.push(Token::new(TokenKind::Num(num), num.to_string(), loc));
                         loc.succ(digit);
                         num = 0;
                         break;
@@ -106,7 +109,7 @@ pub(crate) fn tokenize(program: &mut std::iter::Peekable<std::str::Chars<'_>>) -
             Some(c) => error_at(*c, loc),
 
             None => {
-                tokens.push(Token::new(TokenKind::EOF, "".to_string()));
+                tokens.push(Token::new(TokenKind::EOF, "".to_string(), loc));
                 break;
             }
         }
