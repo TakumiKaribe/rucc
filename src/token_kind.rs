@@ -1,4 +1,7 @@
-#[derive(Debug)]
+use lazy_static::lazy_static;
+use std::collections::HashMap;
+
+#[derive(Debug, Clone)]
 pub(crate) enum TokenKind {
     Reserved(String),
     Num(u32),
@@ -7,11 +10,10 @@ pub(crate) enum TokenKind {
     EOF,
 }
 
-impl TokenKind {
-    pub(crate) fn keywords(word: &String) -> Option<Self> {
-        match word.as_str() {
-            "return" => Some(TokenKind::Return),
-            _ => None,
-        }
-    }
+lazy_static! {
+    pub(crate) static ref KEYWORD: HashMap<&'static str, TokenKind> =
+        [("return", TokenKind::Return)]
+            .iter()
+            .cloned()
+            .collect::<HashMap<_, _>>();
 }

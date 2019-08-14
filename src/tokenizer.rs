@@ -80,8 +80,8 @@ pub(crate) fn tokenize(program: &mut std::iter::Peekable<std::str::Chars<'_>>) -
                     len += 1;
                 }
                 loc.len(len);
-                match TokenKind::keywords(&var) {
-                    Some(kind) => tokens.push(Token::new(kind, var, loc)),
+                match KEYWORD.get(&var.as_str()) {
+                    Some(kind) => tokens.push(Token::new(kind.clone(), var, loc)),
                     None => tokens.push(Token::new(TokenKind::Ident(var.clone()), var, loc)),
                 }
                 loc.succ(len);
