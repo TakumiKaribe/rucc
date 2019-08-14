@@ -1,6 +1,7 @@
 use std::io;
 
 mod generator;
+mod location;
 mod node;
 mod node_kind;
 mod parser;
@@ -8,7 +9,6 @@ mod token;
 mod token_kind;
 mod tokenizer;
 mod variable;
-mod location;
 
 fn main() {
     let mut program = String::new();
