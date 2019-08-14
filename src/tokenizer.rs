@@ -1,6 +1,6 @@
-use super::token::Token;
-use super::token_kind::*;
-use super::location::Location;
+use crate::location::Location;
+use crate::token::Token;
+use crate::token_kind::*;
 
 fn error_at(c: char, loc: Location) {
     (0..loc.at).for_each(|_| print!(" "));

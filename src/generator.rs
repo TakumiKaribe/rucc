@@ -1,5 +1,5 @@
-use super::node::Node;
-use super::node_kind::NodeKind::*;
+use crate::node::Node;
+use crate::node_kind::NodeKind::*;
 
 fn gen_lval(node: &Node) {
     if let LVar(offset) = node.kind {

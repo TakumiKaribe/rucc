@@ -1,5 +1,5 @@
-use super::token_kind::*;
-use super::location::Location;
+use crate::location::Location;
+use crate::token_kind::*;
 
 #[derive(Debug)]
 pub(crate) struct Token {
@@ -10,7 +10,11 @@ pub(crate) struct Token {
 
 impl Token {
     pub(crate) fn new(kind: TokenKind, raw_string: String, location: Location) -> Token {
-        Token { kind, raw_string, location }
+        Token {
+            kind,
+            raw_string,
+            location,
+        }
     }
 
     pub(crate) fn consume(&self, op: &str) -> bool {

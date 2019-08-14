@@ -1,4 +1,4 @@
-use super::node_kind::NodeKind;
+use crate::node_kind::NodeKind;
 
 #[derive(Debug)]
 pub(crate) struct Node {

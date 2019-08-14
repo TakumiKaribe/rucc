@@ -1,4 +1,4 @@
-use super::token::Token;
+use crate::token::Token;
 
 pub(crate) struct LVar {
     locals: Vec<Var>,

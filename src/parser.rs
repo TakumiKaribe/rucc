@@ -1,8 +1,8 @@
-use super::node::Node;
-use super::node_kind::NodeKind;
-use super::token::Token;
-use super::token_kind::TokenKind;
-use super::variable::*;
+use crate::node::Node;
+use crate::node_kind::NodeKind;
+use crate::token::Token;
+use crate::token_kind::TokenKind;
+use crate::variable::*;
 
 pub(crate) fn program(
     tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>,
