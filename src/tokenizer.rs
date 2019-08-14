@@ -69,7 +69,7 @@ pub(crate) fn tokenize(program: &mut std::iter::Peekable<std::str::Chars<'_>>) -
                 }
             }
 
-            Some(var) if ('a'..='z').contains(var) => {
+            Some(c) if ('a'..='z').contains(c) => {
                 let mut var = program.next().unwrap().to_string();
                 let mut len = 1;
                 while program.peek().map_or(false, |c| ('a'..='z').contains(c)) {
@@ -77,7 +77,10 @@ pub(crate) fn tokenize(program: &mut std::iter::Peekable<std::str::Chars<'_>>) -
                     len += 1;
                 }
                 loc.len(len);
-                tokens.push(Token::new(TokenKind::Ident(var.clone(), loc), var));
+                match TokenKind::keywords(&var, &loc) {
+                    Some(kind) => tokens.push(Token::new(kind, var)),
+                    None => tokens.push(Token::new(TokenKind::Ident(var.clone(), loc), var)),
+                }
                 loc.succ(len);
                 program.next();
             }
