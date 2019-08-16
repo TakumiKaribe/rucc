@@ -1,2 +1,4 @@
 **/target
+report/*
+lcov.info
 *tmp*

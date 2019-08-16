@@ -2,7 +2,7 @@ fmt:
 	docker run -t -w /mnt -v ${PWD}:/mnt rucc cargo fmt
 
 check:
-        docker run -t -w /mnt -v ${PWD}:/mnt rucc cargo check
+    docker run -t -w /mnt -v ${PWD}:/mnt rucc cargo check
 
 build:
 	docker run -t -w /mnt -v ${PWD}:/mnt rucc cargo build
@@ -26,6 +26,9 @@ shell:
 test:
 	docker run -t -w /mnt -v ${PWD}:/mnt rucc sh test.sh
 	make clean
+
+coverage:
+	docker run -t -w /mnt -v ${PWD}:/mnt rucc sh coverage.sh
 
 clean:
 	rm -fv tmp*
