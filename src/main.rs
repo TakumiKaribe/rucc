@@ -16,7 +16,8 @@ fn main() {
         .read_line(&mut program)
         .unwrap_or_else(|e| panic!("{}", e));
 
-    let tokens = tokenizer::tokenize(&mut program.chars().peekable());
+    let mut tokenizer = tokenizer::Tokenizer::new(program);
+    let tokens = tokenizer.tokenize();
 
     dbg!(&tokens);
 
