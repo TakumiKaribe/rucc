@@ -2,7 +2,7 @@ fmt:
 	docker run -t -w /mnt -v ${PWD}:/mnt rucc cargo fmt
 
 check:
-docker run -t -w /mnt -v ${PWD}:/mnt rucc cargo check
+        docker run -t -w /mnt -v ${PWD}:/mnt rucc cargo check
 
 build:
 	docker run -t -w /mnt -v ${PWD}:/mnt rucc cargo build
