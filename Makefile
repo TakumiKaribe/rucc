@@ -1,34 +1,37 @@
+DOCKER = docker run --rm -it -w /mnt -v ${PWD}:/mnt rucc
+
 fmt:
-	docker run -t -w /mnt -v ${PWD}:/mnt rucc cargo fmt
+	$(DOCKER) cargo $@
 
 check:
-    docker run -t -w /mnt -v ${PWD}:/mnt rucc cargo check
+	$(DOCKER) cargo $@
 
 build:
-	docker run -t -w /mnt -v ${PWD}:/mnt rucc cargo build
+	$(DOCKER) cargo $@
 
 run:
-	docker run -t -w /mnt -v ${PWD}:/mnt rucc cargo run
+	$(DOCKER) cargo $@
 
 tmp.s:
-	docker run -i -w /mnt -v ${PWD}:/mnt rucc cargo run>tmp.s
+	$(DOCKER) cargo run>$@
 
 tmp: tmp.s
-	docker run -t -w /mnt -v ${PWD}:/mnt rucc gcc -o tmp tmp.s
+	$(DOCKER) gcc -o tmp tmp.s
 
 exec: tmp
-	docker run -t -w /mnt -v ${PWD}:/mnt rucc ./tmp
+	$(DOCKER) ./tmp
 	echo $?
 
-shell:
-	docker run -t -w /mnt -v ${PWD}:/mnt rucc bash
+bash:
+	$(DOCKER) $@
 
 test:
-	docker run -t -w /mnt -v ${PWD}:/mnt rucc sh test.sh
+	$(DOCKER) cargo $@
+	$(DOCKER) sh test.sh
 	make clean
 
 coverage:
-	docker run -t -w /mnt -v ${PWD}:/mnt rucc sh coverage.sh
+	$(DOCKER) sh coverage.sh
 
 clean:
 	rm -fv tmp*
