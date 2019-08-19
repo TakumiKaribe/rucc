@@ -1,10 +1,10 @@
 #!/bin/sh
 
 try() {
-    expected="$1"
-    input="$2"
+    expected="$2"
+    input="$3"
 
-    cargo run "$input" > tmp.s
+    ARG=true DEBUG="$1" cargo run "$input" > tmp.s
     gcc -o tmp tmp.s
     ./tmp
     actual="$?"
@@ -17,9 +17,10 @@ try() {
     fi
 }
 
-try 0 0
-try 42 42
-try 21 "5+20-4"
-try 41 " 12 + 34 - 5 "
+try $1 21 '5+20-4;'
+try $1 41 ' 12 + 34 - 5; '
+try $1 47 '5+6*7;'
+try $1 15 '5*(9-6);'
+try $1 4 '(3+5)/2;'
 
 echo OK

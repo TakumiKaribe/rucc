@@ -1,3 +1,4 @@
+use std::env;
 use std::io;
 
 mod generator;
@@ -12,18 +13,39 @@ mod variable;
 
 fn main() {
     let mut program = String::new();
-    io::stdin()
-        .read_line(&mut program)
-        .unwrap_or_else(|e| panic!("{}", e));
+
+    let is_debug = env::var("DEBUG")
+        .ok()
+        .map_or(false, |is_debug| is_debug == "true");
+
+    let is_arg = env::var("ARG")
+        .ok()
+        .map_or(false, |is_arg| is_arg == "true");
+
+    if is_arg {
+        program = std::env::args()
+            .collect::<Vec<String>>()
+            .get(1)
+            .cloned()
+            .unwrap();
+    } else {
+        io::stdin()
+            .read_line(&mut program)
+            .unwrap_or_else(|e| panic!("{}", e));
+    }
 
     let mut tokenizer = tokenizer::Tokenizer::new(program);
     let tokens = tokenizer.tokenize();
 
-    dbg!(&tokens);
+    if is_debug {
+        dbg!(&tokens);
+    }
 
     let program = parser::program(&mut tokens.iter().peekable());
 
-    dbg!(&program);
+    if is_debug {
+        dbg!(&program);
+    }
 
     println!(".intel_syntax noprefix");
     println!(".global main");

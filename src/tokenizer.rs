@@ -107,7 +107,7 @@ impl Tokenizer {
                     loc.succ(len);
                 }
 
-                Some(n) if n.is_digit(10) => {
+                Some(n) if n.is_ascii_digit() => {
                     let mut num = 0;
                     let mut n = self.examining_char.unwrap();
                     loop {
@@ -117,7 +117,7 @@ impl Tokenizer {
                         if self
                             .input
                             .get(self.position)
-                            .map_or(false, |t| t.is_digit(10))
+                            .map_or(false, char::is_ascii_digit)
                         {
                             n = self.input.get(self.position).cloned().unwrap();
                         } else {
