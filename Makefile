@@ -1,15 +1,15 @@
 DOCKER = docker run --rm -it -w /mnt -v ${PWD}:/mnt rucc
 
-fmt:
-	$(DOCKER) cargo $@
-
 check:
+	cargo fmt
 	$(DOCKER) cargo $@
 
 build:
+	cargo fmt
 	$(DOCKER) cargo $@
 
 run:
+	cargo fmt
 	$(DOCKER) cargo $@
 
 tmp.s:
@@ -26,6 +26,7 @@ bash:
 	$(DOCKER) $@
 
 test:
+	cargo fmt
 	$(DOCKER) cargo $@
 	$(DOCKER) sh test.sh
 	make clean
