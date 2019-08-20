@@ -14,15 +14,15 @@ mod variable;
 fn main() {
     let mut program = String::new();
 
+    let has_arg = env::var("ARG")
+        .ok()
+        .map_or(false, |has_arg| has_arg == "true");
+
     let is_debug = env::var("DEBUG")
         .ok()
         .map_or(false, |is_debug| is_debug == "true");
 
-    let is_arg = env::var("ARG")
-        .ok()
-        .map_or(false, |is_arg| is_arg == "true");
-
-    if is_arg {
+    if has_arg {
         program = std::env::args()
             .collect::<Vec<String>>()
             .get(1)
