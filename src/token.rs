@@ -33,11 +33,19 @@ impl Token {
         }
     }
 
+    pub(crate) fn consume_return(&self) -> bool {
+        use TokenKind::*;
+        match &self.kind {
+            Return => true,
+            _ => false,
+        }
+    }
+
     pub(crate) fn expect(&self, op: &str) {
         use TokenKind::*;
         match &self.kind {
             Reserved(kind) if kind == op => {}
-            _ => panic!("{}ではありません", op),
+            _ => panic!("expect {}. got={}", op, self.kind),
         }
     }
 
@@ -45,7 +53,7 @@ impl Token {
         use TokenKind::*;
         match &self.kind {
             Num(n) => *n,
-            _ => panic!("数ではありません"),
+            _ => panic!("not a number."),
         }
     }
 

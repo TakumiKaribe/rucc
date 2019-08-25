@@ -33,6 +33,14 @@ pub(crate) fn gen(node: Box<Node>) {
             println!("  push rdi");
             return;
         }
+        Return => {
+            gen(node.lhs.expect("[RETURN] left value is not found"));
+            println!("  pop rax");
+            println!("  mov rsp, rbp");
+            println!("  pop rbp");
+            println!("  ret");
+            return;
+        }
         _ => {}
     }
 

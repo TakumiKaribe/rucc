@@ -19,7 +19,18 @@ fn stmt(
     tokens: &mut core::iter::Peekable<std::slice::Iter<'_, Token>>,
     locals: &mut LVar,
 ) -> Box<Node> {
-    let node = expr(tokens, locals);
+    let node: Box<Node>;
+    if tokens.peek().map_or(false, |token| token.consume_return()) {
+        let _ = tokens.next();
+        let lhs = expr(tokens, locals);
+        node = Box::new(Node {
+            kind: NodeKind::Return,
+            lhs: Some(lhs),
+            rhs: None,
+        });
+    } else {
+        node = expr(tokens, locals);
+    };
     tokens
         .next()
         .unwrap_or_else(|| panic!("expected ';'"))

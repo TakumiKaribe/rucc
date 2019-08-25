@@ -10,6 +10,19 @@ pub(crate) enum TokenKind {
     EOF,
 }
 
+impl std::fmt::Display for TokenKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        use TokenKind::*;
+        match self {
+            Reserved(reserved) => write!(f, "{}", reserved),
+            Num(num) => write!(f, "{}", num.to_string()),
+            Ident(ident) => write!(f, "{}", ident),
+            Return => write!(f, "return"),
+            EOF => write!(f, "EOF"),
+        }
+    }
+}
+
 lazy_static! {
     pub(crate) static ref KEYWORD: HashMap<&'static str, TokenKind> =
         [("return", TokenKind::Return)]

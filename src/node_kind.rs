@@ -13,4 +13,5 @@ pub(crate) enum NodeKind {
     GTEqual,
     Assign,
     LVar(u32),
+    Return,
 }

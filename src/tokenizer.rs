@@ -90,14 +90,15 @@ impl Tokenizer {
                 Some(ref c) if ('a'..='z').contains(c) => {
                     let mut var = self.examining_char.unwrap().to_string();
                     let mut len = 1;
+                    self.position += 1;
                     while self
                         .input
-                        .get(self.position + 1)
+                        .get(self.position)
                         .map_or(false, |c| ('a'..='z').contains(c))
                     {
-                        self.position += 1;
                         var.push(self.input.get(self.position).cloned().unwrap());
                         len += 1;
+                        self.position += 1;
                     }
                     loc.len(len);
                     match KEYWORD.get(var.as_str()) {
