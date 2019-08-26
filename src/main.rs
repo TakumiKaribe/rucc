@@ -41,7 +41,9 @@ fn main() {
         dbg!(&tokens);
     }
 
-    let program = parser::program(&mut tokens.iter().peekable());
+    let mut parser = parser::Parser::new(tokens);
+
+    let program = parser.program();
 
     if is_debug {
         dbg!(&program);
