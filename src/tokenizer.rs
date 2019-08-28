@@ -26,7 +26,7 @@ impl Tokenizer {
 
         loop {
             match self.examining_char {
-                Some(' ') | Some('\n') => {
+                Some(ch) if ch.is_whitespace() => {
                     self.position += 1;
                     loc.succ(1);
                 }
@@ -87,14 +87,14 @@ impl Tokenizer {
                     }
                 }
 
-                Some(ref c) if c.is_ascii() || c == &'_' => {
+                Some(ref c) if c.is_ascii_alphabetic() || c == &'_' => {
                     let mut var = self.examining_char.unwrap().to_string();
                     let mut len = 1;
                     self.position += 1;
                     while self
                         .input
                         .get(self.position)
-                        .map_or(false, |c| c.is_ascii() || c.is_ascii_digit() || c == &'_')
+                        .map_or(false, |c| c.is_ascii_alphanumeric() || c == &'_')
                     {
                         var.push(self.input.get(self.position).cloned().unwrap());
                         len += 1;
