@@ -1,13 +1,18 @@
-DOCKER = docker run --rm -it -w /mnt -v ${PWD}:/mnt rucc
 DEBUG=false
+DOCKER = docker run --rm -it -w /mnt -v ${PWD}:/mnt -e DEBUG=${DEBUG} rucc
 
 check:
 	cargo fmt
 	$(DOCKER) cargo $@
 
+.PHONY: build
 build:
 	cargo fmt
 	$(DOCKER) cargo $@
+
+debug: build
+	cargo fmt
+	$(DOCKER) rust-lldb target/debug/rucc DEBUG=true
 
 run:
 	cargo fmt
@@ -29,7 +34,7 @@ bash:
 test:
 	cargo fmt
 	$(DOCKER) cargo $@
-	$(DOCKER) sh test.sh ${DEBUG}
+	$(DOCKER) sh test.sh
 	make clean
 
 coverage:
