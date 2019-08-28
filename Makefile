@@ -1,21 +1,21 @@
 DEBUG=false
 DOCKER = docker run --rm -it -w /mnt -v ${PWD}:/mnt -e DEBUG=${DEBUG} rucc
 
-check:
+.PHONY: fmt
+fmt:
 	cargo fmt
+
+check: fmt
 	$(DOCKER) cargo $@
 
 .PHONY: build
-build:
-	cargo fmt
+build: fmt
 	$(DOCKER) cargo $@
 
-debug: build
-	cargo fmt
+debug: fmt build
 	$(DOCKER) rust-lldb target/debug/rucc
 
-run:
-	cargo fmt
+run: fmt
 	$(DOCKER) cargo $@
 
 tmp.s:
@@ -31,8 +31,7 @@ exec: tmp
 bash:
 	$(DOCKER) $@
 
-test:
-	cargo fmt
+test: fmt
 	$(DOCKER) cargo $@
 	$(DOCKER) sh test.sh
 	make clean
