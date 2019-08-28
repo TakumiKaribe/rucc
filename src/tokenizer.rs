@@ -87,14 +87,14 @@ impl Tokenizer {
                     }
                 }
 
-                Some(ref c) if ('a'..='z').contains(c) => {
+                Some(ref c) if c.is_ascii() || c == &'_' => {
                     let mut var = self.examining_char.unwrap().to_string();
                     let mut len = 1;
                     self.position += 1;
                     while self
                         .input
                         .get(self.position)
-                        .map_or(false, |c| ('a'..='z').contains(c))
+                        .map_or(false, |c| c.is_ascii() || c.is_ascii_digit() || c == &'_')
                     {
                         var.push(self.input.get(self.position).cloned().unwrap());
                         len += 1;
