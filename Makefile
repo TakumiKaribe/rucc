@@ -12,7 +12,7 @@ build:
 
 debug: build
 	cargo fmt
-	$(DOCKER) rust-lldb target/debug/rucc DEBUG=true
+	$(DOCKER) rust-lldb target/debug/rucc
 
 run:
 	cargo fmt
