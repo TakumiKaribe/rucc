@@ -3,19 +3,23 @@ DOCKER = docker run --rm -it -w /mnt -v ${PWD}:/mnt -e DEBUG=${DEBUG} rucc
 
 .PHONY: fmt
 fmt:
-	cargo fmt
+	$(DOCKER) cargo $@
 
-check: fmt
+.PHONY: clippy
+clippy:
+	$(DOCKER) cargo $@
+
+check: fmt clippy
 	$(DOCKER) cargo $@
 
 .PHONY: build
-build: fmt
+build: fmt clippy
 	$(DOCKER) cargo $@
 
-debug: fmt build
+debug: fmt clippy build
 	$(DOCKER) rust-lldb target/debug/rucc
 
-run: fmt
+run: fmt clippy
 	$(DOCKER) cargo $@
 
 tmp.s:
@@ -31,7 +35,7 @@ exec: tmp
 bash:
 	$(DOCKER) $@
 
-test: fmt
+test: fmt clippy
 	$(DOCKER) cargo $@
 	$(DOCKER) sh test.sh
 	make clean
