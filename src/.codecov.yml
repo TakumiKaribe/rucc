@@ -1,0 +1,6 @@
+ignore:
+  - src/generator.rs
+  - src/location.rs
+  - src/main.rs
+  - src/node_kind.rs
+  - src/node.rs
