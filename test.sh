@@ -4,7 +4,7 @@ try() {
     expected="$1"
     input="$2"
 
-    cargo run "$input" >tmp.s
+    ARG=true cargo run "$input" >tmp.s
     gcc -o tmp tmp.s
     ./tmp
     actual="$?"
