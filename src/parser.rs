@@ -18,7 +18,7 @@ impl Parser {
     }
 
     pub(crate) fn program(&mut self) -> Vec<Box<Node>> {
-        let mut program: Vec<Box<Node>> = Vec::new();
+        let mut program: Vec<Box<Node>> = vec![];
         let mut locals = LVar::new();
         while self
             .tokens
@@ -207,7 +207,7 @@ impl Parser {
 
         if token.consume("+") {
             self.position += 1;
-            self.term(locals)
+            self.primary(locals)
         } else if token.consume("-") {
             self.position += 1;
             Box::new(Node {
@@ -217,14 +217,14 @@ impl Parser {
                     lhs: None,
                     rhs: None,
                 })),
-                rhs: Some(self.term(locals)),
+                rhs: Some(self.primary(locals)),
             })
         } else {
-            self.term(locals)
+            self.primary(locals)
         }
     }
 
-    fn term(&mut self, locals: &mut LVar) -> Box<Node> {
+    fn primary(&mut self, locals: &mut LVar) -> Box<Node> {
         let token = self.tokens.get(self.position).expect("token is none");
         self.position += 1;
 
