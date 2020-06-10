@@ -41,10 +41,10 @@ fn main() {
     }
 
     let mut parser = parser::Parser::new(tokens);
-    let program = parser.program();
+    let ast = parser.program();
 
     if is_debug {
-        dbg!(&program);
+        dbg!(&ast);
     }
 
     println!(".intel_syntax noprefix");
@@ -55,7 +55,7 @@ fn main() {
     println!("  mov rbp, rsp");
     println!("  sub rsp, 208");
 
-    program.into_iter().for_each(|ast| {
+    ast.into_iter().for_each(|ast| {
         generator::gen(ast);
         println!("  pop rax");
     });
