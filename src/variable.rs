@@ -1,13 +1,12 @@
 use crate::token::Token;
 
-pub(crate) struct LVar {
-    locals: Vec<Var>,
-}
-
 pub(crate) struct Var {
     pub(crate) name: String,
-    pub(crate) len: u32,
     pub(crate) offset: u32,
+}
+
+pub(crate) struct LVar {
+    locals: Vec<Var>,
 }
 
 impl LVar {

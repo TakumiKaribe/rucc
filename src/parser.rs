@@ -17,8 +17,8 @@ impl Parser {
         }
     }
 
-    pub(crate) fn program(&mut self) -> Vec<Box<Node>> {
-        let mut program: Vec<Box<Node>> = vec![];
+    pub(crate) fn program(&mut self) -> Vec<Node> {
+        let mut program: Vec<Node> = vec![];
         let mut locals = LVar::new();
         while self
             .tokens
@@ -30,8 +30,8 @@ impl Parser {
         program
     }
 
-    fn stmt(&mut self, locals: &mut LVar) -> Box<Node> {
-        let node: Box<Node>;
+    fn stmt(&mut self, locals: &mut LVar) -> Node {
+        let node: Node;
         if self
             .tokens
             .get(self.position)
@@ -39,11 +39,11 @@ impl Parser {
         {
             self.position += 1;
             let lhs = self.expr(locals);
-            node = Box::new(Node {
+            node = Node {
                 kind: NodeKind::Return,
-                lhs: Some(lhs),
+                lhs: Some(Box::new(lhs)),
                 rhs: None,
-            });
+            };
         } else {
             node = self.expr(locals);
         };
@@ -55,11 +55,11 @@ impl Parser {
         node
     }
 
-    fn expr(&mut self, locals: &mut LVar) -> Box<Node> {
+    fn expr(&mut self, locals: &mut LVar) -> Node {
         self.assign(locals)
     }
 
-    fn assign(&mut self, locals: &mut LVar) -> Box<Node> {
+    fn assign(&mut self, locals: &mut LVar) -> Node {
         let mut node = self.equality(locals);
         if self
             .tokens
@@ -67,16 +67,16 @@ impl Parser {
             .map_or(false, |t| t.consume("="))
         {
             self.position += 1;
-            node = Box::new(Node {
+            node = Node {
                 kind: NodeKind::Assign,
-                lhs: Some(node),
-                rhs: Some(self.assign(locals)),
-            });
+                lhs: Some(Box::new(node)),
+                rhs: Some(Box::new(self.assign(locals))),
+            };
         }
         node
     }
 
-    fn equality(&mut self, locals: &mut LVar) -> Box<Node> {
+    fn equality(&mut self, locals: &mut LVar) -> Node {
         let mut node = self.relational(locals);
 
         loop {
@@ -84,18 +84,18 @@ impl Parser {
 
             if token.consume("==") {
                 self.position += 1;
-                node = Box::new(Node {
+                node = Node {
                     kind: NodeKind::Equal,
-                    lhs: Some(node),
-                    rhs: Some(self.relational(locals)),
-                });
+                    lhs: Some(Box::new(node)),
+                    rhs: Some(Box::new(self.relational(locals))),
+                };
             } else if token.consume("!=") {
                 self.position += 1;
-                node = Box::new(Node {
+                node = Node {
                     kind: NodeKind::NotEqual,
-                    lhs: Some(node),
-                    rhs: Some(self.relational(locals)),
-                });
+                    lhs: Some(Box::new(node)),
+                    rhs: Some(Box::new(self.relational(locals))),
+                };
             } else {
                 break;
             }
@@ -104,7 +104,7 @@ impl Parser {
         node
     }
 
-    fn relational(&mut self, locals: &mut LVar) -> Box<Node> {
+    fn relational(&mut self, locals: &mut LVar) -> Node {
         let mut node = self.add(locals);
 
         loop {
@@ -112,32 +112,32 @@ impl Parser {
 
             if token.consume("<") {
                 self.position += 1;
-                node = Box::new(Node {
+                node = Node {
                     kind: NodeKind::LT,
-                    lhs: Some(node),
-                    rhs: Some(self.add(locals)),
-                });
+                    lhs: Some(Box::new(node)),
+                    rhs: Some(Box::new(self.add(locals))),
+                };
             } else if token.consume("<=") {
                 self.position += 1;
-                node = Box::new(Node {
+                node = Node {
                     kind: NodeKind::LTEqual,
-                    lhs: Some(node),
-                    rhs: Some(self.add(locals)),
-                });
+                    lhs: Some(Box::new(node)),
+                    rhs: Some(Box::new(self.add(locals))),
+                };
             } else if token.consume(">") {
                 self.position += 1;
-                node = Box::new(Node {
+                node = Node {
                     kind: NodeKind::GT,
-                    lhs: Some(node),
-                    rhs: Some(self.add(locals)),
-                });
+                    lhs: Some(Box::new(node)),
+                    rhs: Some(Box::new(self.add(locals))),
+                };
             } else if token.consume(">=") {
                 self.position += 1;
-                node = Box::new(Node {
+                node = Node {
                     kind: NodeKind::GTEqual,
-                    lhs: Some(node),
-                    rhs: Some(self.add(locals)),
-                });
+                    lhs: Some(Box::new(node)),
+                    rhs: Some(Box::new(self.add(locals))),
+                };
             } else {
                 break;
             }
@@ -146,7 +146,7 @@ impl Parser {
         node
     }
 
-    fn add(&mut self, locals: &mut LVar) -> Box<Node> {
+    fn add(&mut self, locals: &mut LVar) -> Node {
         let mut node = self.mul(locals);
 
         loop {
@@ -154,18 +154,18 @@ impl Parser {
 
             if token.consume("+") {
                 self.position += 1;
-                node = Box::new(Node {
+                node = Node {
                     kind: NodeKind::Add,
-                    lhs: Some(node),
-                    rhs: Some(self.mul(locals)),
-                });
+                    lhs: Some(Box::new(node)),
+                    rhs: Some(Box::new(self.mul(locals))),
+                };
             } else if token.consume("-") {
                 self.position += 1;
-                node = Box::new(Node {
+                node = Node {
                     kind: NodeKind::Sub,
-                    lhs: Some(node),
-                    rhs: Some(self.mul(locals)),
-                });
+                    lhs: Some(Box::new(node)),
+                    rhs: Some(Box::new(self.mul(locals))),
+                };
             } else {
                 break;
             }
@@ -174,7 +174,7 @@ impl Parser {
         node
     }
 
-    fn mul(&mut self, locals: &mut LVar) -> Box<Node> {
+    fn mul(&mut self, locals: &mut LVar) -> Node {
         let mut node = self.unary(locals);
 
         loop {
@@ -182,18 +182,18 @@ impl Parser {
 
             if token.consume("*") {
                 self.position += 1;
-                node = Box::new(Node {
+                node = Node {
                     kind: NodeKind::Mul,
-                    lhs: Some(node),
-                    rhs: Some(self.unary(locals)),
-                });
+                    lhs: Some(Box::new(node)),
+                    rhs: Some(Box::new(self.unary(locals))),
+                };
             } else if token.consume("/") {
                 self.position += 1;
-                node = Box::new(Node {
+                node = Node {
                     kind: NodeKind::Div,
-                    lhs: Some(node),
-                    rhs: Some(self.unary(locals)),
-                });
+                    lhs: Some(Box::new(node)),
+                    rhs: Some(Box::new(self.unary(locals))),
+                };
             } else {
                 break;
             }
@@ -202,7 +202,7 @@ impl Parser {
         node
     }
 
-    fn unary(&mut self, locals: &mut LVar) -> Box<Node> {
+    fn unary(&mut self, locals: &mut LVar) -> Node {
         let token = self.tokens.get(self.position).expect("token is none");
 
         if token.consume("+") {
@@ -210,21 +210,21 @@ impl Parser {
             self.primary(locals)
         } else if token.consume("-") {
             self.position += 1;
-            Box::new(Node {
+            Node {
                 kind: NodeKind::Sub,
                 lhs: Some(Box::new(Node {
                     kind: NodeKind::Num(0),
                     lhs: None,
                     rhs: None,
                 })),
-                rhs: Some(self.primary(locals)),
-            })
+                rhs: Some(Box::new(self.primary(locals))),
+            }
         } else {
             self.primary(locals)
         }
     }
 
-    fn primary(&mut self, locals: &mut LVar) -> Box<Node> {
+    fn primary(&mut self, locals: &mut LVar) -> Node {
         let token = self.tokens.get(self.position).expect("token is none");
         self.position += 1;
 
@@ -239,7 +239,7 @@ impl Parser {
         } else if token.consume_ident() {
             let mut node = Node {
                 kind: NodeKind::LVar(
-                    (u32::from(token.raw_string.chars().nth(0).unwrap()) - u32::from('a')) * 8,
+                    (u32::from(token.raw_string.chars().next().unwrap()) - u32::from('a')) * 8,
                 ),
                 lhs: None,
                 rhs: None,
@@ -249,7 +249,6 @@ impl Parser {
             } else if let TokenKind::Ident(ref ident_name) = token.kind {
                 let lvar = Var {
                     name: ident_name.clone(),
-                    len: ident_name.len() as u32,
                     offset: locals.offset() + 8,
                 };
                 node.kind = NodeKind::LVar(lvar.offset);
@@ -257,13 +256,13 @@ impl Parser {
             } else {
                 panic!("expect ident");
             };
-            Box::new(node)
+            node
         } else {
-            Box::new(Node {
+            Node {
                 kind: NodeKind::Num(token.expect_number()),
                 lhs: None,
                 rhs: None,
-            })
+            }
         }
     }
 }

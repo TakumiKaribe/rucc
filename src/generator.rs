@@ -11,7 +11,7 @@ fn gen_lval(node: &Node) {
     panic!("left value is not variable")
 }
 
-pub(crate) fn gen(node: Box<Node>) {
+pub(crate) fn gen(node: &Node) {
     match node.kind {
         Num(val) => {
             println!("  push {}", val);
@@ -25,8 +25,11 @@ pub(crate) fn gen(node: Box<Node>) {
             return;
         }
         Assign => {
-            gen_lval(&node.lhs.expect("[ASSIGN] left value is not found"));
-            gen(node.rhs.expect("[ASSIGN] right value is not found"));
+            gen_lval(node.lhs.as_ref().expect("[ASSIGN] left value is not found"));
+            gen(node
+                .rhs
+                .as_ref()
+                .expect("[ASSIGN] right value is not found"));
             println!("  pop rdi");
             println!("  pop rax");
             println!("  mov [rax], rdi");
@@ -34,7 +37,7 @@ pub(crate) fn gen(node: Box<Node>) {
             return;
         }
         Return => {
-            gen(node.lhs.expect("[RETURN] left value is not found"));
+            gen(node.lhs.as_ref().expect("[RETURN] left value is not found"));
             println!("  pop rax");
             println!("  mov rsp, rbp");
             println!("  pop rbp");
@@ -44,8 +47,8 @@ pub(crate) fn gen(node: Box<Node>) {
         _ => {}
     }
 
-    gen(node.lhs.expect("token is none"));
-    gen(node.rhs.expect("token is none"));
+    gen(node.lhs.as_ref().expect("token is none"));
+    gen(node.rhs.as_ref().expect("token is none"));
 
     println!("  pop rdi");
     println!("  pop rax");

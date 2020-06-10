@@ -55,8 +55,8 @@ fn main() {
     println!("  mov rbp, rsp");
     println!("  sub rsp, 208");
 
-    ast.into_iter().for_each(|ast| {
-        generator::gen(ast);
+    ast.iter().for_each(|node| {
+        generator::gen(node);
         println!("  pop rax");
     });
 
