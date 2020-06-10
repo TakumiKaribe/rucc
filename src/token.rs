@@ -1,20 +1,14 @@
-use crate::location::Location;
 use crate::token_kind::*;
 
 #[derive(Debug)]
 pub(crate) struct Token {
     pub(crate) kind: TokenKind,
     pub(crate) raw_string: String,
-    pub(crate) location: Location,
 }
 
 impl Token {
-    pub(crate) fn new(kind: TokenKind, raw_string: String, location: Location) -> Token {
-        Token {
-            kind,
-            raw_string,
-            location,
-        }
+    pub(crate) fn new(kind: TokenKind, raw_string: String) -> Token {
+        Token { kind, raw_string }
     }
 
     pub(crate) fn consume(&self, op: &str) -> bool {

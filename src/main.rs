@@ -2,7 +2,6 @@ use std::env;
 use std::io;
 
 mod generator;
-mod location;
 mod node;
 mod node_kind;
 mod parser;
@@ -42,7 +41,6 @@ fn main() {
     }
 
     let mut parser = parser::Parser::new(tokens);
-
     let program = parser.program();
 
     if is_debug {
