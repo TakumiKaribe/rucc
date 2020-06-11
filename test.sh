@@ -4,7 +4,7 @@ assert() {
     expected="$1"
     input="$2"
 
-    ARG=true cargo run "$input" >tmp.s
+    cargo run "$input" >tmp.s
     gcc -o tmp tmp.s
     ./tmp
     actual="$?"
