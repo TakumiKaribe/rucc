@@ -207,7 +207,7 @@ impl Parser {
 
         if token.consume("+") {
             self.position += 1;
-            self.primary(locals)
+            self.unary(locals)
         } else if token.consume("-") {
             self.position += 1;
             Node {
@@ -217,7 +217,7 @@ impl Parser {
                     lhs: None,
                     rhs: None,
                 })),
-                rhs: Some(Box::new(self.primary(locals))),
+                rhs: Some(Box::new(self.unary(locals))),
             }
         } else {
             self.primary(locals)
