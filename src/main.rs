@@ -1,5 +1,5 @@
 use std::env;
-use std::io;
+use std::fs;
 
 mod generator;
 mod node;
@@ -11,27 +11,21 @@ mod tokenizer;
 mod variable;
 
 fn main() {
-    let mut program = String::new();
-
-    let has_arg = env::var("ARG")
-        .ok()
-        .map_or(false, |has_arg| has_arg == "true");
-
     let is_debug = env::var("DEBUG")
         .ok()
         .map_or(false, |is_debug| is_debug == "true");
 
-    if has_arg {
-        program = std::env::args()
-            .collect::<Vec<String>>()
-            .get(1)
-            .cloned()
-            .unwrap();
-    } else {
-        io::stdin()
-            .read_line(&mut program)
-            .unwrap_or_else(|e| panic!("{}", e));
-    }
+    let filename = std::env::args()
+        .collect::<Vec<String>>()
+        .get(1)
+        .cloned()
+        .unwrap();
+    let program = fs::read_to_string(filename).expect("file not found.");
+    // let program = std::env::args()
+    //     .collect::<Vec<String>>()
+    //     .get(1)
+    //     .cloned()
+    //     .unwrap();
 
     let mut tokenizer = tokenizer::Tokenizer::new(program);
     let tokens = tokenizer.tokenize();
