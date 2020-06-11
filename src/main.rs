@@ -21,11 +21,6 @@ fn main() {
         .cloned()
         .unwrap();
     let program = fs::read_to_string(filename).expect("file not found.");
-    // let program = std::env::args()
-    //     .collect::<Vec<String>>()
-    //     .get(1)
-    //     .cloned()
-    //     .unwrap();
 
     let mut tokenizer = tokenizer::Tokenizer::new(program);
     let tokens = tokenizer.tokenize();
