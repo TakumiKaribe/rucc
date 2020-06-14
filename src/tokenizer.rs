@@ -52,6 +52,7 @@ impl Tokenizer {
                         }));
                     }
                     tokens.push(Token::new(TokenKind::Reserved(op.clone()), op));
+                    self.position += 1;
                 }
 
                 Some(op) if op == '!' => {
@@ -60,7 +61,7 @@ impl Tokenizer {
                             TokenKind::Reserved("!=".to_string()),
                             "!=".to_string(),
                         ));
-                        self.position += 1;
+                        self.position += 2;
                     } else {
                         error_at(&self, self.position);
                     }

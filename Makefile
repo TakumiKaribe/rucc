@@ -1,4 +1,5 @@
 DEBUG=false
+TARGET=""
 DOCKER = docker run --rm -it -w /mnt -v ${PWD}:/mnt -e DEBUG=${DEBUG} rucc
 
 .PHONY: fmt
@@ -20,7 +21,7 @@ debug: fmt clippy build
 	$(DOCKER) rust-lldb target/debug/rucc
 
 run: fmt clippy
-	$(DOCKER) cargo $@
+	$(DOCKER) cargo $@ $(TARGET)
 
 tmp.s:
 	$(DOCKER) cargo run>$@
