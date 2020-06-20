@@ -1,28 +1,19 @@
 use crate::token::Token;
 
+#[derive(Debug)]
 pub(crate) struct Var {
+    pub(crate) next: Option<Box<Var>>,
     pub(crate) name: String,
     pub(crate) offset: u32,
 }
 
-pub(crate) struct LVar {
-    locals: Vec<Var>,
-}
-
-impl LVar {
-    pub(crate) fn new() -> Self {
-        Self { locals: vec![] }
-    }
-
-    pub(crate) fn push(&mut self, var: Var) {
-        self.locals.push(var);
-    }
-
+impl Var {
     pub(crate) fn find_lvar(&self, token: &Token) -> Option<&Var> {
-        self.locals.iter().find(|var| var.name == token.raw_string)
-    }
-
-    pub(crate) fn offset(&self) -> u32 {
-        self.locals.iter().next().map_or(0, |var| var.offset)
+        while let Some(ref var) = &self.next {
+            if var.name == token.raw_string && var.name.len() == token.raw_string.len() {
+                return Some(&var);
+            }
+        }
+        None
     }
 }

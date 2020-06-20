@@ -19,7 +19,7 @@ impl Parser {
 
     pub(crate) fn program(&mut self) -> Vec<Node> {
         let mut program: Vec<Node> = vec![];
-        let mut locals = LVar::new();
+        let mut locals: Option<Box<Var>> = None;
         while self
             .tokens
             .get(self.position)
@@ -30,7 +30,7 @@ impl Parser {
         program
     }
 
-    fn stmt(&mut self, locals: &mut LVar) -> Node {
+    fn stmt(&mut self, locals: &mut Option<Box<Var>>) -> Node {
         let node: Node;
         if self
             .tokens
@@ -55,11 +55,11 @@ impl Parser {
         node
     }
 
-    fn expr(&mut self, locals: &mut LVar) -> Node {
+    fn expr(&mut self, locals: &mut Option<Box<Var>>) -> Node {
         self.assign(locals)
     }
 
-    fn assign(&mut self, locals: &mut LVar) -> Node {
+    fn assign(&mut self, locals: &mut Option<Box<Var>>) -> Node {
         let mut node = self.equality(locals);
         if self
             .tokens
@@ -76,7 +76,7 @@ impl Parser {
         node
     }
 
-    fn equality(&mut self, locals: &mut LVar) -> Node {
+    fn equality(&mut self, locals: &mut Option<Box<Var>>) -> Node {
         let mut node = self.relational(locals);
 
         loop {
@@ -104,7 +104,7 @@ impl Parser {
         node
     }
 
-    fn relational(&mut self, locals: &mut LVar) -> Node {
+    fn relational(&mut self, locals: &mut Option<Box<Var>>) -> Node {
         let mut node = self.add(locals);
 
         loop {
@@ -146,7 +146,7 @@ impl Parser {
         node
     }
 
-    fn add(&mut self, locals: &mut LVar) -> Node {
+    fn add(&mut self, locals: &mut Option<Box<Var>>) -> Node {
         let mut node = self.mul(locals);
 
         loop {
@@ -174,7 +174,7 @@ impl Parser {
         node
     }
 
-    fn mul(&mut self, locals: &mut LVar) -> Node {
+    fn mul(&mut self, locals: &mut Option<Box<Var>>) -> Node {
         let mut node = self.unary(locals);
 
         loop {
@@ -202,7 +202,7 @@ impl Parser {
         node
     }
 
-    fn unary(&mut self, locals: &mut LVar) -> Node {
+    fn unary(&mut self, locals: &mut Option<Box<Var>>) -> Node {
         let token = self.tokens.get(self.position).expect("token is none");
 
         if token.consume("+") {
@@ -224,7 +224,7 @@ impl Parser {
         }
     }
 
-    fn primary(&mut self, locals: &mut LVar) -> Node {
+    fn primary(&mut self, locals: &mut Option<Box<Var>>) -> Node {
         let token = self.tokens.get(self.position).expect("token is none");
         self.position += 1;
 
@@ -237,26 +237,32 @@ impl Parser {
             self.position += 1;
             node
         } else if token.consume_ident() {
-            let mut node = Node {
-                kind: NodeKind::LVar(
-                    (u32::from(token.raw_string.chars().next().unwrap()) - u32::from('a')) * 8,
-                ),
-                lhs: None,
-                rhs: None,
-            };
-            if let Some(var) = locals.find_lvar(token) {
-                node.kind = NodeKind::LVar(var.offset);
+            if let Some(var) = locals.as_ref().and_then(|var| var.find_lvar(token)) {
+                Node {
+                    kind: NodeKind::LVar(var.offset),
+                    lhs: None,
+                    rhs: None,
+                }
             } else if let TokenKind::Ident(ref ident_name) = token.kind {
-                let lvar = Var {
+                let local = locals.take();
+                let mut var = Var {
+                    next: None,
                     name: ident_name.clone(),
-                    offset: locals.offset() + 8,
+                    offset: 0,
                 };
-                node.kind = NodeKind::LVar(lvar.offset);
-                locals.push(lvar);
+
+                var.offset = local.as_ref().expect("local variable is none").offset + 8;
+                var.next = local;
+                let node = Node {
+                    kind: NodeKind::LVar(var.offset),
+                    lhs: None,
+                    rhs: None,
+                };
+                std::mem::replace(locals, Some(Box::new(var)));
+                node
             } else {
                 panic!("expect ident");
-            };
-            node
+            }
         } else {
             Node {
                 kind: NodeKind::Num(token.expect_number()),
