@@ -17,33 +17,38 @@ assert() {
     fi
 }
 
-assert 0 './test/01'
-assert 42 './test/02'
-assert 21 './test/03'
-assert 41 './test/04'
-assert 47 './test/05'
-assert 15 './test/06'
-assert 4 './test/07'
-assert 10 './test/08'
-assert 10 './test/09'
-assert 10 './test/10'
+assert 0 "'0;'"
+assert 42 "'42;'"
+assert 21 "'5+20-4;'"
+assert 41 "'12 + 34 - 5;'"
+assert 47 "'5+6*7;'"
+assert 15 "'5*(9-6);'"
+assert 4 "'(3+5)/2;'"
+assert 10 "'-10+20;'"
+assert 10 "'- -10;'"
+assert 10 "'- - +10;'"
 
-assert 0 './test/11'
-assert 1 './test/12'
-assert 0 './test/13'
+assert 0 "'0==1;'"
+assert 1 "'42==42;'"
+assert 0 "'42!=42;'"
 
-assert 1 './test/14'
-assert 0 './test/15'
-assert 0 './test/16'
-assert 1 './test/17'
-assert 1 './test/18'
-assert 0 './test/19'
+assert 1 "'0<1;'"
+assert 0 "'1<1;'"
+assert 0 "'2<1;'"
+assert 1 "'0<=1;'"
+assert 1 "'1<=1;'"
+assert 0 "'2<=1;'"
 
-assert 1 './test/20'
-assert 0 './test/21'
-assert 0 './test/22'
-assert 1 './test/23'
-assert 1 './test/24'
-assert 0 './test/25'
+assert 1 "'1>0;'"
+assert 0 "'1>1;'"
+assert 0 "'1>2;'"
+assert 1 "'1>=0;'"
+assert 1 "'1>=1;'"
+assert 0 "'1>=2;'"
+
+assert 3 "'int a; a=3; a;'"
+assert 8 "'int a; int z; a=3; z=5; a+z;'"
+assert 3 "'int a=3; a;'"
+assert 8 "'int a=3; int z=5; a+z;'"
 
 echo OK

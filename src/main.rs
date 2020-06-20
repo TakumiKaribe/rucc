@@ -1,5 +1,4 @@
 use std::env;
-use std::fs;
 
 mod generator;
 mod node;
@@ -15,12 +14,12 @@ fn main() {
         .ok()
         .map_or(false, |is_debug| is_debug == "true");
 
-    let filename = std::env::args()
+    let mut program = std::env::args()
         .collect::<Vec<String>>()
         .get(1)
         .cloned()
         .unwrap();
-    let program = fs::read_to_string(filename).expect("file not found.");
+    program = program[1..program.len() - 1].to_string();
 
     let mut tokenizer = tokenizer::Tokenizer::new(program);
     let tokens = tokenizer.tokenize();
