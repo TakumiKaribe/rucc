@@ -19,7 +19,13 @@ fn main() {
         .get(1)
         .cloned()
         .unwrap();
+    if is_debug {
+        println!("{}", program);
+    }
     program = program[1..program.len() - 1].to_string();
+    if is_debug {
+        println!("{}", program);
+    }
 
     let mut tokenizer = tokenizer::Tokenizer::new(program);
     let tokens = tokenizer.tokenize();
