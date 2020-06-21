@@ -244,22 +244,36 @@ impl Parser {
                     rhs: None,
                 }
             } else if let TokenKind::Ident(ref ident_name) = token.kind {
-                let local = locals.take();
-                let mut var = Var {
-                    next: None,
-                    name: ident_name.clone(),
-                    offset: 0,
-                };
+                if locals.is_some() {
+                    let local = locals.take();
+                    let mut var = Var {
+                        next: None,
+                        name: ident_name.clone(),
+                        offset: 0,
+                    };
 
-                var.offset = local.as_ref().expect("local variable is none").offset + 8;
-                var.next = local;
-                let node = Node {
-                    kind: NodeKind::LVar(var.offset),
-                    lhs: None,
-                    rhs: None,
-                };
-                std::mem::replace(locals, Some(Box::new(var)));
-                node
+                    var.offset = local.as_ref().expect("local variable is none").offset + 8;
+                    var.next = local;
+                    let node = Node {
+                        kind: NodeKind::LVar(var.offset),
+                        lhs: None,
+                        rhs: None,
+                    };
+                    std::mem::replace(locals, Some(Box::new(var)));
+                    node
+                } else {
+                    let var = Var {
+                        next: None,
+                        name: ident_name.clone(),
+                        offset: 0,
+                    };
+                    std::mem::replace(locals, Some(Box::new(var)));
+                    Node {
+                        kind: NodeKind::LVar(0),
+                        lhs: None,
+                        rhs: None,
+                    }
+                }
             } else {
                 panic!("expect ident");
             }
