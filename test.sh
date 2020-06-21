@@ -46,9 +46,4 @@ assert 1 "'1>=0;'"
 assert 1 "'1>=1;'"
 assert 0 "'1>=2;'"
 
-assert 3 "'int a; a=3; a;'"
-assert 8 "'int a; int z; a=3; z=5; a+z;'"
-assert 3 "'int a=3; a;'"
-assert 8 "'int a=3; int z=5; a+z;'"
-
 echo OK
